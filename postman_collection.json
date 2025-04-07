@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "OAuth 2.0 Authorization Server",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register Client",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_name\": \"Test Client\",\n  \"redirect_uris\": [\"http://localhost/callback\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3033/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3033",
+          "path": ["register"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();",
+              "pm.environment.set(\"client_id\", response.client_id);",
+              "pm.environment.set(\"client_secret\", response.client_secret);",
+              "console.log(\"Client ID and Secret set in environment variables.\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authorize",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3033/authorize?client_id={{client_id}}&response_type=code&state=xyz&redirect_uri=http://localhost/callback",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3033",
+          "path": ["authorize"],
+          "query": [
+            {
+              "key": "client_id",
+              "value": "{{client_id}}"
+            },
+            {
+              "key": "response_type",
+              "value": "code"
+            },
+            {
+              "key": "state",
+              "value": "xyz"
+            },
+            {
+              "key": "redirect_uri",
+              "value": "http://localhost/callback"
+            }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let redirectUrl = pm.response.headers.get(\"location\");",
+              "let url = new URL(redirectUrl);",
+              "let code = url.searchParams.get(\"code\");",
+              "pm.environment.set(\"authorization_code\", code);",
+              "console.log(\"Authorization Code set in environment variables.\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "key": "code",
+              "value": "{{authorization_code}}"
+            },
+            {
+              "key": "client_id",
+              "value": "{{client_id}}"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client_secret}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:3033/token",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3033",
+          "path": ["token"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();",
+              "pm.environment.set(\"access_token\", response.access_token);",
+              "console.log(\"Access Token set in environment variables.\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "client_id",
+      "value": ""
+    },
+    {
+      "key": "client_secret",
+      "value": ""
+    },
+    {
+      "key": "authorization_code",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
+}
