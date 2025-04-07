@@ -77,8 +77,9 @@ pub async fn token(
 
     dotenv().ok(); // Load environment variables from .env
 
-    // Load the private key from the `private.pem` file
-    let private_key = fs::read_to_string("private.pem").expect("Failed to read private.pem");
+    // Load the private key from the `unsafe-private.pem` file
+    let private_key =
+        fs::read_to_string("unsafe-private.pem").expect("Failed to read unsafe-private.pem");
     let encoding_key = EncodingKey::from_rsa_pem(private_key.as_bytes())
         .expect("Failed to create encoding key from private key");
 
